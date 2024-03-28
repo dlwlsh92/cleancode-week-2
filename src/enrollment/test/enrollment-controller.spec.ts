@@ -53,10 +53,10 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
                     })
             })
             await Promise.all(requests);
-            const round = await testRepository.getRoundById(id);
+            const roundCapacity = await testRepository.getRoundCapacityByRoundId(id);
             const enrollments = await testRepository.getEnrollmentsByRoundId(id);
 
-            expect(round?.enrolledCount).toBe(30);
+            expect(roundCapacity?.enrolledCount).toBe(30);
             expect(enrollments.length).toBe(30);
             expect(enrollments.filter(enrollment => enrollment.status === EnrollmentStatus.Success).length).toBe(30);
         }, 10000)
@@ -100,13 +100,13 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
 
         await Promise.all(requests);
 
-        const firstRound = await testRepository.getRoundById(firstRoundId);
-        const secondRound = await testRepository.getRoundById(secondRoundId);
+        const firstRoundCapacity = await testRepository.getRoundCapacityByRoundId(firstRoundId);
+        const secondRoundCapacity = await testRepository.getRoundCapacityByRoundId(secondRoundId);
         const firstRoundEnrollments = await testRepository.getEnrollmentsByRoundId(firstRoundId);
         const secondRoundEnrollments = await testRepository.getEnrollmentsByRoundId(secondRoundId);
 
-        expect(firstRound?.enrolledCount).toBe(30);
-        expect(secondRound?.enrolledCount).toBe(30);
+        expect(firstRoundCapacity?.enrolledCount).toBe(30);
+        expect(secondRoundCapacity?.enrolledCount).toBe(30);
 
         expect(firstRoundEnrollments.length).toBe(30);
         expect(secondRoundEnrollments.length).toBe(30);

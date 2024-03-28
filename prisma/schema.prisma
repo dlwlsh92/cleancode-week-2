@@ -26,15 +26,24 @@ model Courses {
 }
 
 model Rounds {
-  id                  Int           @id @default(autoincrement())
+  id                  Int             @id @default(autoincrement())
   enrollmentStartDate DateTime
   courseId            Int
   enrolledCount       Int
   maxEnrolledCapacity Int
   startDate           DateTime
   roundName           String
-  Courses             Courses       @relation(fields: [courseId], references: [id])
+  Courses             Courses         @relation(fields: [courseId], references: [id])
   Enrollments         Enrollments[]
+  RoundsCapacity      RoundsCapacity?
+}
+
+model RoundsCapacity {
+  id                  Int    @id @default(autoincrement())
+  enrolledCount       Int
+  maxEnrolledCapacity Int
+  roundId             Int    @unique
+  Rounds              Rounds @relation(fields: [roundId], references: [id])
 }
 
 model Enrollments {

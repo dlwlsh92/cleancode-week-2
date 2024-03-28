@@ -29,6 +29,15 @@ export class TestRepository {
                 roundName: 'validRound'
             }
         })
+
+        await this.prismaService.roundsCapacity.create({
+            data: {
+                roundId: validRound.id,
+                enrolledCount: enrolledCount,
+                maxEnrolledCapacity: maxEnrolledCapacity
+            }
+        })
+
         return new Round(
             validRound.id,
             validRound.enrollmentStartDate,
@@ -56,6 +65,13 @@ export class TestRepository {
                 roundName: 'firstRound'
             }
         })
+        await this.prismaService.roundsCapacity.create({
+            data: {
+                roundId: firstRound.id,
+                enrolledCount: enrolledCount,
+                maxEnrolledCapacity: maxEnrolledCapacity
+            }
+        })
         const secondRound = await this.prismaService.rounds.create({
             data: {
                 enrollmentStartDate: addHoursToCurrentTime(1),
@@ -66,24 +82,19 @@ export class TestRepository {
                 roundName: 'secondRound'
             }
         })
+        await this.prismaService.roundsCapacity.create({
+            data: {
+                roundId: secondRound.id,
+                enrolledCount: enrolledCount,
+                maxEnrolledCapacity: maxEnrolledCapacity
+            }
+
+        })
         return {
             courseId: course.id,
             firstRoundId: firstRound.id,
             secondRoundId: secondRound.id
         }
-    }
-
-    async deleteSeedData(round: Round) {
-        await this.prismaService.rounds.delete({
-            where: {
-                id: round.id
-            }
-        })
-        await this.prismaService.courses.delete({
-            where: {
-                id: round.courseId
-            }
-        })
     }
 
     async createUsers() {
@@ -95,18 +106,6 @@ export class TestRepository {
         return result.id;
     }
 
-    async clearUserData(userId: number) {
-        await this.prismaService.enrollments.deleteMany({
-            where: {
-                userId: userId
-            }
-        })
-        await this.prismaService.users.delete({
-            where: {
-                id: userId
-            }
-        })
-    }
 
     async getEnrollmentByUserIdAndCourseIdAndRoundId(userId: number, courseId: number, roundId: number) {
         const result = await this.prismaService.enrollments.findUnique({
@@ -137,6 +136,7 @@ export class TestRepository {
         await this.prismaService.enrollmentHistory.deleteMany({});
         await this.prismaService.enrollments.deleteMany({});
         await this.prismaService.users.deleteMany({});
+        await this.prismaService.roundsCapacity.deleteMany({});
         await this.prismaService.rounds.deleteMany({});
         await this.prismaService.courses.deleteMany({});
     }
@@ -158,6 +158,15 @@ export class TestRepository {
             result.startDate,
             result.roundName
         )
+    }
+
+    async getRoundCapacityByRoundId(roundId: number) {
+        const result = await this.prismaService.roundsCapacity.findUnique({
+            where: {
+                roundId: roundId
+            }
+        })
+        return result;
     }
 
     async getEnrollmentsByRoundId(roundId: number) {

@@ -73,25 +73,26 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
           }
 
           /**
-          * 해당 round의 enrolledCount 동시성을 제어를 위해 SELECT ... FOR UPDATE 사용
-          * round 테이블의 다른 값들은 변경할 일이 잦지 않을 것으로 판단해서 enrolledCount와 maxEnrolledCapacity를 따로 테이블로 분리하지 않았습니다.
+          * 해당 roundCapacity의 enrolledCount 동시성을 제어를 위해 SELECT ... FOR UPDATE 사용
+          * 특강의 날짜별 정보를 조회하기 위해 roundId를 이용하여 RoundsCapacity 테이블에서 enrolledCount와 maxEnrolledCapacity를 조회
+          * roundCapacity만 lock을 걸어 rounds의 정보를 조회하는데 문제 없도록 하기 위함.
           * */
-          const round = await transactionalPrisma.$queryRaw`
-                                          SELECT "enrolledCount", "maxEnrolledCapacity"
-                                          FROM "Rounds"
-                                          WHERE "id" = ${roundId}
-                                          FOR UPDATE`;
+          const roundCapacity = await transactionalPrisma.$queryRaw`
+            SELECT "enrolledCount", "maxEnrolledCapacity"
+            FROM "RoundsCapacity"
+            WHERE "roundId" = ${roundId}
+            FOR UPDATE`;
 
-          if (!round) {
+          if (!roundCapacity) {
             throw new Error(EnrollmentErrorMessages.notExistRound);
           }
 
-          if (round[0].enrolledCount >= round[0].maxEnrolledCapacity) {
+          if (roundCapacity[0].enrolledCount >= roundCapacity[0].maxEnrolledCapacity) {
             throw new Error(EnrollmentErrorMessages.fullCapacity);
           }
 
-          await transactionalPrisma.rounds.update({
-            where: { id: roundId },
+          await transactionalPrisma.roundsCapacity.update({
+            where: { roundId },
             data: { enrolledCount: { increment: 1 } },
           });
 
@@ -113,7 +114,6 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
                 updatedAt: new Date(),
             },
           })
-          return true
         },
       );
     } catch (error) {

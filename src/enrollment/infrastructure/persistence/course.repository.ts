@@ -26,4 +26,24 @@ export class CourseRepository implements ICourseRepository {
             round.roundName
         ))
     }
+
+    async syncRoundsWithCapacity(roundId: number) {
+        const roundCapacity = await this.prisma.roundsCapacity.findUnique({
+            where: {
+                roundId
+            }
+        })
+        if (!roundCapacity) {
+            throw new Error("해당 특강의 모집 인원 정보가 존재하지 않습니다.")
+        }
+        const round = await this.prisma.rounds.update({
+            where: {
+                id: roundId
+            },
+            data: {
+                enrolledCount: roundCapacity.enrolledCount
+            }
+        })
+        return roundCapacity.enrolledCount === round.enrolledCount
+    }
 }
