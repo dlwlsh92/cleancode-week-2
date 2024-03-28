@@ -120,7 +120,7 @@ enrollment-controller.spec.ts
 **2️⃣ (기본)** 특강 신청 완료 여부 조회 API
 
 1. 특정 userId로 특강 신청 완료 여부를 조회하는 API를 작성한다.
-    1. courseId, roundId, userId를 통해 enrollment의 isRegistered가 true인 table이 존재하는지 확인하고, 있을 경우 true를 없을 경우 false를 반환한다.
+    1. courseId, roundId, userId를 통해 enrollment의 status가 success인 table이 존재하는지 확인하고, 있을 경우 true를 없을 경우 false를 반환한다.
 
 3️⃣ **(선택) 특강 선택 API**
 
