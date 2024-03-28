@@ -39,6 +39,39 @@ export class TestRepository {
         )
     }
 
+    async createSeedDataWithChapterFourTest(enrolledCount: number, maxEnrolledCapacity: number) {
+        const course = await this.prismaService.courses.create({
+            data: {
+                title: 'test',
+            }
+        })
+        const firstRound = await this.prismaService.rounds.create({
+            data: {
+                enrollmentStartDate: addHoursToCurrentTime(1),
+                courseId: course.id,
+                enrolledCount: enrolledCount,
+                maxEnrolledCapacity: maxEnrolledCapacity,
+                startDate: addHoursToCurrentTime(2),
+                RoundName: 'firstRound'
+            }
+        })
+        const secondRound = await this.prismaService.rounds.create({
+            data: {
+                enrollmentStartDate: addHoursToCurrentTime(1),
+                courseId: course.id,
+                enrolledCount: enrolledCount,
+                maxEnrolledCapacity: maxEnrolledCapacity,
+                startDate: addHoursToCurrentTime(2),
+                RoundName: 'secondRound'
+            }
+        })
+        return {
+            courseId: course.id,
+            firstRoundId: firstRound.id,
+            secondRoundId: secondRound.id
+        }
+    }
+
     async deleteSeedData(round: Round) {
         await this.prismaService.rounds.delete({
             where: {
