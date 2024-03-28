@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  success
+  canceled
+}
+
+model Courses {
+  id          Int           @id @default(autoincrement())
+  title       String
+  Rounds      Rounds[]
+  Enrollments Enrollments[]
+}
+
+model Rounds {
+  id                  Int           @id @default(autoincrement())
+  enrollmentStartDate DateTime
+  courseId            Int
+  enrolledCount       Int
+  maxEnrolledCapacity Int
+  startDate           DateTime
+  RoundName           String
+  Courses             Courses       @relation(fields: [courseId], references: [id])
+  Enrollments         Enrollments[]
+}
+
+model Enrollments {
+  id                Int                 @id @default(autoincrement())
+  courseId          Int
+  roundId           Int
+  userId            Int
+  status            Status
+  Courses           Courses             @relation(fields: [courseId], references: [id])
+  Rounds            Rounds              @relation(fields: [roundId], references: [id])
+  Users             Users               @relation(fields: [userId], references: [id])
+  EnrollmentHistory EnrollmentHistory[]
+
+  @@unique(fields: [userId, courseId, roundId], name: "unique_enrollment")
+}
+
+model Users {
+  id          Int           @id @default(autoincrement())
+  name        String
+  email       String        @unique
+  password    String
+  Enrollments Enrollments[]
+}
+
+model EnrollmentHistory {
+  id           Int         @id @default(autoincrement())
+  enrollmentId Int
+  status       Status
+  memo         String
+  updatedAt    DateTime
+  Enrollments  Enrollments @relation(fields: [enrollmentId], references: [id])
+}
