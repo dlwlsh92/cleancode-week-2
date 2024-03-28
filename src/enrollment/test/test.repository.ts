@@ -115,4 +115,13 @@ export class TestRepository {
         })
         return result;
     }
+
+    async getEnrollmentsByRoundId(roundId: number) {
+        const result = await this.prismaService.enrollments.findMany({
+            where: {
+                roundId: roundId
+            }
+        })
+        return result;
+    }
 }

@@ -65,32 +65,25 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
               },
             });
 
-          console.log("=>(enrollments.repository.ts:62) existingEnrollment", existingEnrollment);
-
           if (
             existingEnrollment &&
             existingEnrollment.status === EnrollmentStatus.Success
           ) {
-              console.log("=>(enrollments.repository.ts:68) if문으로 들어옴." );
             throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
           }
 
 
-          const round = await transactionalPrisma.rounds.findUnique({
-            where: { id: roundId },
-            select: {
-              enrolledCount: true,
-              maxEnrolledCapacity: true,
-            }
-          })
-
-            console.log("=>(enrollments.repository.ts:81) round", round);
+          const round = await transactionalPrisma.$queryRaw`
+                                          SELECT "enrolledCount", "maxEnrolledCapacity"
+                                          FROM "Rounds"
+                                          WHERE "id" = ${roundId}
+                                          FOR UPDATE`;
 
           if (!round) {
             throw new Error(EnrollmentErrorMessages.notExistRound);
           }
 
-          if (round.enrolledCount >= round.maxEnrolledCapacity) {
+          if (round[0].enrolledCount >= round[0].maxEnrolledCapacity) {
             throw new Error(EnrollmentErrorMessages.fullCapacity);
           }
 
@@ -110,12 +103,9 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
 
           return enrollment.status === EnrollmentStatus.Success;
         },
-        {
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-        }
       );
     } catch (error) {
-    console.log("=>(enrollments.repository.ts:118) error.message", error.message);
+        console.log("=>(enrollments.repository.ts:116) error.message", error.message);
     switch (error.message) {
         case EnrollmentErrorMessages.alreadyEnrolled:
             throw new Error(EnrollmentErrorMessages.alreadyEnrolled);

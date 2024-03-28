@@ -6,6 +6,7 @@ import {TestRepository} from "./test.repository";
 import {Round} from "../domain/round";
 import {PrismaService} from "../../prisma/prisma.service";
 import {register} from "tsconfig-paths";
+import {EnrollmentStatus} from "../domain/enrollments";
 
 
 describe('동시 수강 신청에 대한 API 테스트', () => {
@@ -31,13 +32,13 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
     })
 
     afterEach(async () => {
-        // await testRepository.deleteAll();
+        await testRepository.deleteAll();
     })
 
     describe('동시 수강 신청에 대한 API 테스트', () => {
         it('최대 정원을 초과하는 인원이 수강 신청을 해도 30명까지만 수강 신청이 가능하다.', async () => {
             const {courseId, id} = seedData;
-            const registerCount = 5;
+            const registerCount = 40;
             let createdUsers: number[] = [];
 
             const userIds = await Promise.all(
@@ -47,8 +48,6 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
                     return userId;
                 })
             )
-
-            console.log("=>(enrollment-controller.spec.ts:139) userIds", userIds);
             const requests = userIds.map(userId => {
                 return request(app.getHttpServer())
                     .post(`/enrollment/users/${userId}/enroll/course`)
@@ -59,10 +58,11 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
             })
             await Promise.all(requests);
             const round = await testRepository.getRoundById(id);
+            const enrollments = await testRepository.getEnrollmentsByRoundId(id);
 
-            // expect(round?.enrolledCount).toBe(30);
-            // await testRepository.deleteAll();
-        }, 30000)
-
+            expect(round?.enrolledCount).toBe(30);
+            expect(enrollments.length).toBe(30);
+            expect(enrollments.filter(enrollment => enrollment.status === EnrollmentStatus.Success).length).toBe(30);
+        }, 10000)
     })
 })
