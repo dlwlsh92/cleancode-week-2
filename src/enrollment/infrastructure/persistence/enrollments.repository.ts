@@ -1,9 +1,16 @@
-import {Injectable} from "@nestjs/common";
-import {EnrollmentDetails, EnrollmentStatus,} from "src/enrollment/domain/enrollments";
-import {IEnrollmentsRepository} from "src/enrollment/domain/interfaces/enrollments-repository.interface";
-import {PrismaService} from "src/prisma/prisma.service";
-import {Round} from "../../domain/round";
-import {Prisma} from "@prisma/client";
+import { Injectable } from "@nestjs/common";
+import { Round } from "../../domain/round";
+import { Prisma } from "@prisma/client";
+import { IEnrollmentsRepository } from "../../domain/interfaces/enrollments-repository.interface";
+import { PrismaService } from "../../../prisma/prisma.service";
+import { EnrollmentDetails, EnrollmentStatus } from "../../domain/enrollments";
+
+
+enum EnrollmentErrorMessages {
+    alreadyEnrolled = "이미 등록한 특강입니다.",
+    fullCapacity = "해당 특강은 모집 인원이 다 찼습니다.",
+    notExistRound = "해당 특강은 존재하지 않는 특강입니다.",
+}
 
 @Injectable()
 export class EnrollmentRepository implements IEnrollmentsRepository {
@@ -15,25 +22,28 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
   ): Promise<EnrollmentDetails | null> {
     // prisma를 이용해 userId, courseId, roundId로 EnrollmentDetails를 조회하는 코드 작성
     const enrollment = await this.prisma.enrollments.findUnique({
-        where: {
-          unique_enrollment: {
-            userId,
-            courseId,
-            roundId,
-          }
-        }
-    })
+      where: {
+        unique_enrollment: {
+          userId,
+          courseId,
+          roundId,
+        },
+      },
+    });
     if (!enrollment) {
-      return null
+      return null;
     }
-    const status = enrollment.status === EnrollmentStatus.Success ? EnrollmentStatus.Success : EnrollmentStatus.Canceled
+    const status =
+      enrollment.status === EnrollmentStatus.Success
+        ? EnrollmentStatus.Success
+        : EnrollmentStatus.Canceled;
     return new EnrollmentDetails(
-        enrollment.id,
-        enrollment.courseId,
-        enrollment.roundId,
-        enrollment.userId,
-        status
-    )
+      enrollment.id,
+      enrollment.courseId,
+      enrollment.roundId,
+      enrollment.userId,
+      status
+    );
   }
 
   async enrollForCourse(
@@ -42,22 +52,31 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
     roundId: number
   ): Promise<boolean> {
     try {
-        await this.prisma.$transaction(async (transactionalPrisma) => {
-          const existingEnrollment = await this.prisma.enrollments.findUnique({
-            where: {
-              unique_enrollment: {
-                userId,
-                courseId,
-                roundId,
-              }
-            }
-          })
+      await this.prisma.$transaction(
+        async (transactionalPrisma) => {
+          const existingEnrollment =
+            await transactionalPrisma.enrollments.findUnique({
+              where: {
+                unique_enrollment: {
+                  userId,
+                  courseId,
+                  roundId,
+                },
+              },
+            });
 
-          if (existingEnrollment && existingEnrollment.status === EnrollmentStatus.Success) {
-            throw new Error('이미 등록한 특강입니다.')
+          console.log("=>(enrollments.repository.ts:62) existingEnrollment", existingEnrollment);
+
+          if (
+            existingEnrollment &&
+            existingEnrollment.status === EnrollmentStatus.Success
+          ) {
+              console.log("=>(enrollments.repository.ts:68) if문으로 들어옴." );
+            throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
           }
 
-          const round = await this.prisma.rounds.findUnique({
+
+          const round = await transactionalPrisma.rounds.findUnique({
             where: { id: roundId },
             select: {
               enrolledCount: true,
@@ -65,32 +84,48 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
             }
           })
 
+            console.log("=>(enrollments.repository.ts:81) round", round);
+
           if (!round) {
-            throw new Error('해당 특강은 존재하지 않는 특강입니다.')
+            throw new Error(EnrollmentErrorMessages.notExistRound);
           }
 
           if (round.enrolledCount >= round.maxEnrolledCapacity) {
-            throw new Error('해당 특강은 모집 인원이 다 찼습니다.')
+            throw new Error(EnrollmentErrorMessages.fullCapacity);
           }
 
-          await this.prisma.rounds.update({
+          await transactionalPrisma.rounds.update({
             where: { id: roundId },
             data: { enrolledCount: { increment: 1 } },
           });
 
-          await this.prisma.enrollments.create({
-              data: {
+          const enrollment = await transactionalPrisma.enrollments.create({
+            data: {
               courseId,
               roundId,
               userId,
-              status: EnrollmentStatus.Success
-              }
-          })
-        }, {
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable
-        })
+              status: EnrollmentStatus.Success,
+            },
+          });
+
+          return enrollment.status === EnrollmentStatus.Success;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        }
+      );
     } catch (error) {
-        throw new Error('특강 등록에 실패했습니다.')
+    console.log("=>(enrollments.repository.ts:118) error.message", error.message);
+    switch (error.message) {
+        case EnrollmentErrorMessages.alreadyEnrolled:
+            throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
+        case EnrollmentErrorMessages.fullCapacity:
+            throw new Error(EnrollmentErrorMessages.fullCapacity);
+        case EnrollmentErrorMessages.notExistRound:
+            throw new Error(EnrollmentErrorMessages.notExistRound);
+        default:
+            throw new Error("수강 등록에 실패하였습니다.");
+        }
     }
     return true;
   }
@@ -98,17 +133,17 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
   async findRoundById(roundId: number) {
     const round = await this.prisma.rounds.findUnique({
       where: { id: roundId },
-    })
+    });
     if (!round) {
-      throw new Error('조회한 특강은 존재하지 않는 특강입니다.')
+      throw new Error("조회한 특강은 존재하지 않는 특강입니다.");
     }
     return new Round(
-        round.id,
-        round.enrollmentStartDate,
-        round.courseId,
-        round.enrolledCount,
-        round.maxEnrolledCapacity,
-        round.startDate,
-    )
+      round.id,
+      round.enrollmentStartDate,
+      round.courseId,
+      round.enrolledCount,
+      round.maxEnrolledCapacity,
+      round.startDate
+    );
   }
 }
