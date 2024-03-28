@@ -98,4 +98,21 @@ export class TestRepository {
         })
         return result
     }
+
+    async deleteAll() {
+        await this.prismaService.enrollments.deleteMany();
+        await this.prismaService.users.deleteMany();
+        await this.prismaService.rounds.deleteMany();
+        await this.prismaService.courses.deleteMany();
+    }
+
+
+    async getRoundById(roundId: number) {
+        const result = await this.prismaService.rounds.findUnique({
+            where: {
+                id: roundId
+            }
+        })
+        return result;
+    }
 }
