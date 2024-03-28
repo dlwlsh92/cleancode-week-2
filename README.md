@@ -1,80 +1,62 @@
 
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
 ## Installation
+
+- postgreSQL 설치
 
 ```bash
 $ npm install
+$ .env
+$ DATABASE_URL=`postgresql://${user}:${password}@localhost:5432/${database}?schema=public`
+$ npx prisma migrate dev
+$ npx prisma generate
 ```
 
 ## Running the app
 
 ```bash
-# development
-$ npm run start
-
 # watch mode
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
 ## Test
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
 # test coverage
 $ npm run test:cov
+$ enrollment-controller.spec.ts // e2e test
+$ enrollment-service.spec.ts // 통합 테스트
+$ enrollments.spec.ts // 단위 테스트
+$ rounds.spec.ts // 단위 테스트
 ```
 
-## Support
+## Test 시나리오
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+enrollments.spec.ts
+- 수강 등록이 유효한지 검증하는 테스트
+  - 유효한 수강 등록이면 true를 리턴한다.
+  - 취소된 수강 등록이면 이미 취소된 수강신청입니다. 에러를 던진다.
 
-## Stay in touch
+rounds.spec.ts
+- 수강 등록 시 유효한 강의 기수인지 확인하는 테스트
+  - 특강 날짜가 종료된 수강 등록일 경우 특강이 종료되었다는 에러를 던진다.
+  - 특강 모집일이 시작되지 않은 수강 등록일 경우 특강 모집일이 아직 시작하지 않았다는 에러를 던진다.
+  - 특강 모집 인원이 다 찬 경우 특강 모집 인원이 다 찼다는 에러를 던진다.
+  - 특강 모집 인원이 다 차지 않은 경우 true를 리턴한다.
+  - 특강 등록 일자가 유효한 경우 true를 리턴한다.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+enrollment-service.spec.ts
+- 수강 등록 테스트
+  - 유효한 라운드이고, 수강 인원이 남아있을 경우 수강 등록이 가능하다.
+  - 이미 수강 등록한 유저가 다시 수강 등록을 할 경우 "이미 등록한 특강입니다." 에러를 던진다.
+  - 수강 인원이 다 찬 경우 수강 등록이 불가능하다.
+  - 존재하지 않는 라운드일 경우 수강 등록이 불가능하다.
+- 수강 등록 조회에 대한 테스트
+  - 특정 유저가 수강 등록한 특강이 없을 경우 false를 반환한다.
+  - 등록한 수강이 status가 Canceled일 경우 "이미 취소된 수강신청입니다." 에러를 반환한다.
 
-## License
-
-Nest is [MIT licensed](LICENSE).
-=======
-# cleancode-week-2
-
+enrollment-controller.spec.ts
+- 최대 정원을 초과하는 인원이 수강 신청을 해도 30명까지만 수강 신청이 가능하다.
+- 여러 기수에 동시 수강신청이 들어와도 30명까지만 수강 신청이 가능하다
 
 ## Description
 
