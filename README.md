@@ -77,8 +77,23 @@ enrollment-controller.spec.ts
 
 
 ## ERD
-![image](https://github.com/dlwlsh92/cleancode-week-2/assets/102504924/42712f0a-2645-4fb3-b0f2-3d0733245df5)
+<img width="657" alt="image" src="https://github.com/dlwlsh92/cleancode-week-2/assets/102504924/92299079-7756-4062-8d11-6db70a537458">
 
+Courses
+- 단순히 컨텐츠만 놓고 동일한 강의를 나타내는 테이블로 컨텐츠를 제외한 운영이나 방식에 관련된 내용은 없음.
+
+Rounds
+- 동일한 컨텐츠를 가지고 행하는 날짜나 등록 기간 등의 명세가 포함되어 있는 테이블
+
+RoundsCapacity
+- 유저는 강의의 각 기수 별로 정보를 조회할 수 있어야 하기 때문에 수강 등록 시 발생하는 lock을 필요한 최대 정원, 현재 인원으로 한정시키기 위함
+
+Enrollments
+- 수강 등록에 성공하면 생성되는 테이블로 userId, roundId, courseId를 유니크 키로 지정하여 하나 이상 생성되는 것을 방지함.
+- 수강 취소 했을 경우 status는 canceled, 유효한 경우 success
+
+EnrollmentHistory
+- 수강 히스토리 적재
 
 
 
