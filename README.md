@@ -95,7 +95,8 @@ enrollment-controller.spec.ts
 
 
 ## ERD
-![drawSQL-image-export-2024-03-25 (2)](https://github.com/dlwlsh92/cleancode-week-2/assets/102504924/f16bd25c-fab6-4f36-a4c1-84848d43cf32)
+![image](https://github.com/dlwlsh92/cleancode-week-2/assets/102504924/42712f0a-2645-4fb3-b0f2-3d0733245df5)
+
 
 
 
