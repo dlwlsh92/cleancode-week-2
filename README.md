@@ -2,31 +2,13 @@
 ## Installation
 
 - postgreSQL 설치
+- .env에 로컬 데이터베이스 정보 기입
+  - DATABASE_URL=`postgresql://${user}:${password}@localhost:5432/${database}?schema=public`
 
 ```bash
 $ npm install
-$ .env
-$ DATABASE_URL=`postgresql://${user}:${password}@localhost:5432/${database}?schema=public`
 $ npx prisma migrate dev
 $ npx prisma generate
-```
-
-## Running the app
-
-```bash
-# watch mode
-$ npm run start:dev
-```
-
-## Test
-
-```bash
-# test coverage
-$ npm run test:cov
-$ enrollment-controller.spec.ts // e2e test
-$ enrollment-service.spec.ts // 통합 테스트
-$ enrollments.spec.ts // 단위 테스트
-$ rounds.spec.ts // 단위 테스트
 ```
 
 ## Test 시나리오
