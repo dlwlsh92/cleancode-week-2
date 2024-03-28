@@ -12,7 +12,7 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
     let testRepository: TestRepository;
     let seedData: Round;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const module = await Test.createTestingModule({
             imports: [EnrollmentModule],
             providers: [TestRepository, PrismaService]
@@ -20,12 +20,18 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
 
         enrollmentService = module.get<EnrollmentService>(EnrollmentService);
         testRepository = module.get<TestRepository>(TestRepository);
+    })
 
+    beforeEach(async () => {
         seedData = await testRepository.createSeedData(0, 1);
     })
 
     afterEach(async () => {
         await testRepository.deleteSeedData(seedData);
+    })
+
+    afterAll(async () => {
+        await testRepository.deleteAll();
     })
 
     describe('수강 등록 테스트', () => {
