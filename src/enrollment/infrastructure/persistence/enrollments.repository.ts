@@ -135,7 +135,7 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
       where: { id: roundId },
     });
     if (!round) {
-      throw new Error("조회한 특강은 존재하지 않는 특강입니다.");
+      throw new Error("해당 특강은 존재하지 않는 특강입니다.");
     }
     return new Round(
       round.id,

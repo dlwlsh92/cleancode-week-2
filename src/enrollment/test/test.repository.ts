@@ -56,8 +56,6 @@ export class TestRepository {
         const result = await this.prismaService.users.create({
             data: {
                 name: 'test',
-                email: 'test',
-                password: 'test'
             }
         })
         return result.id;
