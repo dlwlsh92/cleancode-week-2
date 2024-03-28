@@ -96,6 +96,9 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
             data: { enrolledCount: { increment: 1 } },
           });
 
+          /**
+          * courseId, roundId, userId를 unique key로 설정함으로써 동일한 수강 신청을 방지
+          * */
           const enrollment = await transactionalPrisma.enrollments.create({
             data: {
               courseId,
