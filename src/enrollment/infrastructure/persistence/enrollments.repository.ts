@@ -72,7 +72,10 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
             throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
           }
 
-
+          /**
+          * 해당 round의 enrolledCount 동시성을 제어를 위해 SELECT ... FOR UPDATE 사용
+          * round 테이블의 다른 값들은 변경할 일이 잦지 않을 것으로 판단해서 enrolledCount와 maxEnrolledCapacity를 따로 테이블로 분리하지 않았습니다.
+          * */
           const round = await transactionalPrisma.$queryRaw`
                                           SELECT "enrolledCount", "maxEnrolledCapacity"
                                           FROM "Rounds"
@@ -101,7 +104,16 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
             },
           });
 
-          return enrollment.status === EnrollmentStatus.Success;
+          // 수강 취소를 할 경우 status를 canceled로 변경하기 때문에 추적을 위해 enrollmentHistory에 저장
+          await transactionalPrisma.enrollmentHistory.create({
+            data: {
+              enrollmentId: enrollment.id,
+                status: EnrollmentStatus.Success,
+                memo: "수강 신청 완료",
+                updatedAt: new Date(),
+            },
+          })
+          return true
         },
       );
     } catch (error) {
@@ -133,7 +145,8 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
       round.courseId,
       round.enrolledCount,
       round.maxEnrolledCapacity,
-      round.startDate
+      round.startDate,
+      round.roundName,
     );
   }
 }

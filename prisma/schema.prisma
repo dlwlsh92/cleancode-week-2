@@ -32,7 +32,7 @@ model Rounds {
   enrolledCount       Int
   maxEnrolledCapacity Int
   startDate           DateTime
-  RoundName           String
+  roundName           String
   Courses             Courses       @relation(fields: [courseId], references: [id])
   Enrollments         Enrollments[]
 }

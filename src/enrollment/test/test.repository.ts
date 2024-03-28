@@ -26,7 +26,7 @@ export class TestRepository {
                 enrolledCount: enrolledCount,
                 maxEnrolledCapacity: maxEnrolledCapacity,
                 startDate: addHoursToCurrentTime(2),
-                RoundName: 'validRound'
+                roundName: 'validRound'
             }
         })
         return new Round(
@@ -35,7 +35,8 @@ export class TestRepository {
             validRound.courseId,
             validRound.enrolledCount,
             validRound.maxEnrolledCapacity,
-            validRound.startDate
+            validRound.startDate,
+            validRound.roundName,
         )
     }
 
@@ -52,7 +53,7 @@ export class TestRepository {
                 enrolledCount: enrolledCount,
                 maxEnrolledCapacity: maxEnrolledCapacity,
                 startDate: addHoursToCurrentTime(2),
-                RoundName: 'firstRound'
+                roundName: 'firstRound'
             }
         })
         const secondRound = await this.prismaService.rounds.create({
@@ -62,7 +63,7 @@ export class TestRepository {
                 enrolledCount: enrolledCount,
                 maxEnrolledCapacity: maxEnrolledCapacity,
                 startDate: addHoursToCurrentTime(2),
-                RoundName: 'secondRound'
+                roundName: 'secondRound'
             }
         })
         return {
@@ -133,10 +134,11 @@ export class TestRepository {
     }
 
     async deleteAll() {
-        await this.prismaService.enrollments.deleteMany();
-        await this.prismaService.users.deleteMany();
-        await this.prismaService.rounds.deleteMany();
-        await this.prismaService.courses.deleteMany();
+        await this.prismaService.enrollmentHistory.deleteMany({});
+        await this.prismaService.enrollments.deleteMany({});
+        await this.prismaService.users.deleteMany({});
+        await this.prismaService.rounds.deleteMany({});
+        await this.prismaService.courses.deleteMany({});
     }
 
 
@@ -146,7 +148,16 @@ export class TestRepository {
                 id: roundId
             }
         })
-        return result;
+        if (!result) return null;
+        return new Round(
+            result.id,
+            result.enrollmentStartDate,
+            result.courseId,
+            result.enrolledCount,
+            result.maxEnrolledCapacity,
+            result.startDate,
+            result.roundName
+        )
     }
 
     async getEnrollmentsByRoundId(roundId: number) {

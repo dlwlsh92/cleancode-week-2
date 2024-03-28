@@ -29,17 +29,4 @@ export class EnrollmentController {
   ): Promise<boolean> {
     return this.enrollmentService.verifyEnrollment(userId, courseId, roundId);
   }
-
-  @Get(':id')
-  async test(@Param('id', IntValidationPipe) id: number) {
-    console.log(id)
-    console.log(typeof id)
-    return id
-  }
-
-  @Post('test')
-  async test2(@Body(CourseDataDtoValidationPipe) body: any) {
-    console.log(body)
-    return body
-  }
 }

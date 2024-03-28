@@ -1,7 +1,6 @@
 import {PrismaService} from "../../prisma/prisma.service";
 import {Test} from "@nestjs/testing";
 import {EnrollmentService} from "../application/enrollment.service";
-import {EnrollmentRepository} from "../infrastructure/persistence/enrollments.repository";
 import {TestRepository} from "./test.repository";
 import {EnrollmentModule} from "../enrollment.module";
 import {Round} from "../domain/round";
@@ -23,15 +22,8 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
     })
 
     beforeEach(async () => {
-        seedData = await testRepository.createSeedData(0, 1);
-    })
-
-    afterEach(async () => {
-        await testRepository.deleteSeedData(seedData);
-    })
-
-    afterAll(async () => {
         await testRepository.deleteAll();
+        seedData = await testRepository.createSeedData(0, 1);
     })
 
     describe('수강 등록 테스트', () => {
@@ -46,7 +38,6 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
             )
             expect(result).toBe(true);
             expect(enrollment?.status).toBe(EnrollmentStatus.Success);
-            await testRepository.clearUserData(userId);
         })
 
 
@@ -58,7 +49,6 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
             const userId = await testRepository.createUsers();
             await testRepository.insertEnrollment(userId, courseId, id, EnrollmentStatus.Success);
             await expect(enrollmentService.enrollCourse(userId, courseId, id)).rejects.toThrow('이미 등록한 특강입니다.');
-            await testRepository.clearUserData(userId);
         })
 
         it('수강 인원이 다 찬 경우 수강 등록이 불가능하다.', async () => {
@@ -71,7 +61,6 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
             expect(firstEnrollmentResult).toBe(true);
             const secondUserId = await testRepository.createUsers();
             await expect(enrollmentService.enrollCourse(secondUserId, courseId, id)).rejects.toThrow('해당 특강은 모집 인원이 다 찼습니다.');
-            await testRepository.clearUserData(userId);
         })
 
         it('존재하지 않는 라운드일 경우 수강 등록이 불가능하다.', async () => {
@@ -82,7 +71,6 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
             const roundId = 0;
             const userId = await testRepository.createUsers();
             await expect(enrollmentService.enrollCourse(userId, courseId, roundId)).rejects.toThrow('해당 특강은 존재하지 않는 특강입니다.');
-            await testRepository.clearUserData(userId);
         })
 
     })
@@ -100,7 +88,6 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
             const userId = await testRepository.createUsers();
             await testRepository.insertEnrollment(userId, courseId, id, EnrollmentStatus.Canceled);
             await expect(enrollmentService.verifyEnrollment(userId, courseId, id)).rejects.toThrow('이미 취소된 수강신청입니다.');
-            await testRepository.clearUserData(userId);
         })
 
     });

@@ -27,6 +27,7 @@ export const roundsMock = (round: Partial<Round>): Round => {
         enrolledCount: 1,
         maxEnrolledCapacity: 1,
         startDate: new Date(),
+        roundName: 'test',
         ...round
     }
     return new Round(
@@ -35,6 +36,7 @@ export const roundsMock = (round: Partial<Round>): Round => {
         doc.courseId,
         doc.enrolledCount,
         doc.maxEnrolledCapacity,
-        doc.startDate
+        doc.startDate,
+        doc.roundName,
     )
 }

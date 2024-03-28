@@ -9,6 +9,7 @@ export class Round {
         public enrolledCount: number,
         public maxEnrolledCapacity: number,
         public startDate: Date,
+        public roundName: string,
     ) {}
 
     validateDate(): boolean {

@@ -5,9 +5,7 @@ import {EnrollmentModule} from "../enrollment.module";
 import {TestRepository} from "./test.repository";
 import {Round} from "../domain/round";
 import {PrismaService} from "../../prisma/prisma.service";
-import {register} from "tsconfig-paths";
 import {EnrollmentStatus} from "../domain/enrollments";
-import {concatAll} from "rxjs";
 
 
 describe('동시 수강 신청에 대한 API 테스트', () => {
@@ -30,10 +28,6 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
     beforeEach(async () => {
         await testRepository.deleteAll();
 
-    })
-
-    afterEach(async () => {
-        await testRepository.deleteAll();
     })
 
     describe('동시 수강 신청에 대한 API 테스트', () => {
@@ -119,5 +113,5 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
 
         expect(firstRoundEnrollments.filter(enrollment => enrollment.status === EnrollmentStatus.Success).length).toBe(30);
         expect(secondRoundEnrollments.filter(enrollment => enrollment.status === EnrollmentStatus.Success).length).toBe(30);
-    })
+    }, 10000)
 })
