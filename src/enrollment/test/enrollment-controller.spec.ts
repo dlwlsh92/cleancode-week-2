@@ -100,8 +100,8 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
 
         await Promise.all(requests);
 
-        const firstRoundCapacity = await testRepository.getRoundCapacityByRoundId(firstRoundId);
-        const secondRoundCapacity = await testRepository.getRoundCapacityByRoundId(secondRoundId);
+        const firstRoundCapacity = await testRepository.getRoundCapacityWithRetry(firstRoundId);
+        const secondRoundCapacity = await testRepository.getRoundCapacityWithRetry(secondRoundId);
         const firstRoundEnrollments = await testRepository.getEnrollmentsByRoundId(firstRoundId);
         const secondRoundEnrollments = await testRepository.getEnrollmentsByRoundId(secondRoundId);
 

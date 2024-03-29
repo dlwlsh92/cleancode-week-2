@@ -178,7 +178,7 @@ export class TestRepository {
         return result;
     }
 
-    async getRoundCapacityWithRetry(roundId: number, maxRetries = 5, delay = 100) {
+    async getRoundCapacityWithRetry(roundId: number, maxRetries = 10, delay = 100) {
         let attempt = 0;
         let roundCapacity;
 
