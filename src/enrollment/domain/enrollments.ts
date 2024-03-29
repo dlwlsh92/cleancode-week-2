@@ -3,6 +3,12 @@ export enum EnrollmentStatus {
   Canceled = "canceled",
 }
 
+export enum EnrollmentErrorMessages {
+  alreadyEnrolled = "이미 등록한 특강입니다.",
+  fullCapacity = "해당 특강은 모집 인원이 다 찼습니다.",
+  notExistRound = "해당 특강은 존재하지 않는 특강입니다.",
+}
+
 export class EnrollmentDetails {
   constructor(
     public id: number,
@@ -17,5 +23,9 @@ export class EnrollmentDetails {
       throw new Error("이미 취소된 수강신청입니다.");
     }
     return true;
+  }
+
+  isSucceeded(): boolean {
+    return this.status === EnrollmentStatus.Success;
   }
 }

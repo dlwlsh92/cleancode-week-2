@@ -1,16 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Round } from "../../domain/round";
-import { Prisma } from "@prisma/client";
 import { IEnrollmentsRepository } from "../../domain/interfaces/enrollments-repository.interface";
 import { PrismaService } from "../../../prisma/prisma.service";
-import { EnrollmentDetails, EnrollmentStatus } from "../../domain/enrollments";
-
-
-enum EnrollmentErrorMessages {
-    alreadyEnrolled = "이미 등록한 특강입니다.",
-    fullCapacity = "해당 특강은 모집 인원이 다 찼습니다.",
-    notExistRound = "해당 특강은 존재하지 않는 특강입니다.",
-}
+import {EnrollmentDetails, EnrollmentErrorMessages, EnrollmentStatus} from "../../domain/enrollments";
 
 @Injectable()
 export class EnrollmentRepository implements IEnrollmentsRepository {
@@ -54,24 +46,6 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
     try {
       await this.prisma.$transaction(
         async (transactionalPrisma) => {
-          const existingEnrollment =
-            await transactionalPrisma.enrollments.findUnique({
-              where: {
-                unique_enrollment: {
-                  userId,
-                  courseId,
-                  roundId,
-                },
-              },
-            });
-
-          if (
-            existingEnrollment &&
-            existingEnrollment.status === EnrollmentStatus.Success
-          ) {
-            throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
-          }
-
           /**
           * 해당 roundCapacity의 enrolledCount 동시성을 제어를 위해 SELECT ... FOR UPDATE 사용
           * 특강의 날짜별 정보를 조회하기 위해 roundId를 이용하여 RoundsCapacity 테이블에서 enrolledCount와 maxEnrolledCapacity를 조회
@@ -121,16 +95,7 @@ export class EnrollmentRepository implements IEnrollmentsRepository {
       );
     } catch (error) {
         console.log("=>(enrollments.repository.ts:116) error.message", error.message);
-    switch (error.message) {
-        case EnrollmentErrorMessages.alreadyEnrolled:
-            throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
-        case EnrollmentErrorMessages.fullCapacity:
-            throw new Error(EnrollmentErrorMessages.fullCapacity);
-        case EnrollmentErrorMessages.notExistRound:
-            throw new Error(EnrollmentErrorMessages.notExistRound);
-        default:
-            throw new Error("수강 등록에 실패하였습니다.");
-        }
+        throw new Error(error.message);
     }
     return true;
   }
