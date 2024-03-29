@@ -53,7 +53,7 @@ describe('동시 수강 신청에 대한 API 테스트', () => {
                     })
             })
             await Promise.all(requests);
-            const roundCapacity = await testRepository.getRoundCapacityByRoundId(id);
+            const roundCapacity = await testRepository.getRoundCapacityWithRetry(id);
             const enrollments = await testRepository.getEnrollmentsByRoundId(id);
 
             expect(roundCapacity?.enrolledCount).toBe(30);

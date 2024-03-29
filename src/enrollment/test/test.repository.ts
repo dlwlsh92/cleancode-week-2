@@ -177,4 +177,22 @@ export class TestRepository {
         })
         return result;
     }
+
+    async getRoundCapacityWithRetry(roundId: number, maxRetries = 5, delay = 100) {
+        let attempt = 0;
+        let roundCapacity;
+
+        while (attempt < maxRetries) {
+            roundCapacity = await this.getRoundCapacityByRoundId(roundId);
+
+            if (roundCapacity !== undefined) {
+                return roundCapacity;
+            }
+
+            attempt++;
+            await new Promise(resolve => setTimeout(resolve, delay * attempt)); // Exponential back-off
+        }
+
+        return roundCapacity;
+    }
 }
