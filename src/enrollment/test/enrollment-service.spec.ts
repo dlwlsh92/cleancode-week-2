@@ -83,11 +83,18 @@ describe('수강 등록 관련 기능(수강 등록, 수강 등록 조회) 테�
             expect(result).toBe(false);
         })
 
-        it('등록한 수강이 status가 Canceled일 경우 "이미 취소된 수강신청입니다." 에러를 반환한다.', async () => {
+        it('등록한 수강이 status가 Canceled일 경우 false를 반환한다.', async () => {
             const {courseId, id} = seedData;
             const userId = await testRepository.createUsers();
             await testRepository.insertEnrollment(userId, courseId, id, EnrollmentStatus.Canceled);
-            await expect(enrollmentService.verifyEnrollment(userId, courseId, id)).rejects.toThrow('이미 취소된 수강신청입니다.');
+            await expect(enrollmentService.verifyEnrollment(userId, courseId, id)).resolves.toBe(false);
+        })
+
+        it('등록한 수강이 status가 Success일 경우 true를 반환한다.', async () => {
+            const {courseId, id} = seedData;
+            const userId = await testRepository.createUsers();
+            await testRepository.insertEnrollment(userId, courseId, id, EnrollmentStatus.Success);
+            await expect(enrollmentService.verifyEnrollment(userId, courseId, id)).resolves.toBe(true);
         })
 
     });

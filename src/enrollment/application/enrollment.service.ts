@@ -21,11 +21,7 @@ export class EnrollmentService {
       courseId,
       roundId
     );
-    if (!enrollmentDetails) {
-      return false;
-    }
-    enrollmentDetails.isValidStatus()
-    return true;
+    return enrollmentDetails !== null && enrollmentDetails.isSucceeded();
   }
 
   async enrollCourse(userId: number, courseId: number, roundId: number) {
@@ -33,13 +29,7 @@ export class EnrollmentService {
     round.validateDate();
     round.validateCapacity();
 
-    const enrollmentDetails = await this.enrollmentRepository.getEnrollmentStatus(
-        userId,
-        courseId,
-        roundId
-        );
-
-    if (enrollmentDetails && enrollmentDetails.isSucceeded()) {
+    if (await this.verifyEnrollment(userId, courseId, roundId)) {
       throw new Error(EnrollmentErrorMessages.alreadyEnrolled);
     }
 

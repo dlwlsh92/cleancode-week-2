@@ -18,13 +18,6 @@ export class EnrollmentDetails {
     public status: EnrollmentStatus
   ) {}
 
-  isValidStatus(): boolean  {
-    if (this.status === EnrollmentStatus.Canceled) {
-      throw new Error("이미 취소된 수강신청입니다.");
-    }
-    return true;
-  }
-
   isSucceeded(): boolean {
     return this.status === EnrollmentStatus.Success;
   }

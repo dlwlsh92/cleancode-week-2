@@ -7,13 +7,13 @@ describe('수강 등록이 유효한지 검증하는 테스트', () => {
         const enrollment = enrollmentDetailsMock({
             status: EnrollmentStatus.Success
         })
-        expect(enrollment.isValidStatus()).toBe(true);
+        expect(enrollment.isSucceeded()).toBe(true);
     })
 
-    it('취소된 수강 등록이면 이미 취소된 수강신청입니다. 에러를 던진다.', () => {
+    it('유효하지 않은 수강 등록이면 false를 리턴한다.', () => {
         const enrollment = enrollmentDetailsMock({
             status: EnrollmentStatus.Canceled
         })
-        expect(() => enrollment.isValidStatus()).toThrowError('이미 취소된 수강신청입니다.');
+        expect(enrollment.isSucceeded()).toBe(false);
     })
 })
